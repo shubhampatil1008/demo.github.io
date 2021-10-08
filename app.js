@@ -27,9 +27,12 @@ const typedotp     = document.querySelector('#typedotp')
 
 
 const states = {
-    101: "MH",
-    102: "GU"
+    101:"AP",102:"AR",103:"AS",104:"BR",105:"CG",106:"GA",107:"GJ",108:"HR",109:"HP",110:"JK",111:"JH",112:"KA",113:"KL",
+    114:"MP",115:"MH",116:"MN",117:"ML",118:"MZ",119:"NL",120:"OR",121:"PB",122:"RJ",123:"SK",124:"TN",125:"TR",126:"UK",
+    127:"UP",128:"WB",129:"TN",130:"TR",131:"AN",132:"CH",133:"DH",134:"DD",135:"DL",136:"LD",137:"PY"
 };
+
+
 
 
 const isRequired = value => value === '' ? false : true;
@@ -174,20 +177,19 @@ form.addEventListener('submit', function (e) {
     let isFormValid = isUsernameValid[0] &&
         isEmailValid && isMobileValid[0];
 
+        
+console.log('isFormValid==>',isFormValid);
+
+    console.log("form valid==>",isUsernameValid[0],isEmailValid,isMobileValid[0],isFormValid)
+    // submit to the server if the form is valid
+    if (isFormValid) {
         form.style.display = "none";
 
         validForm.style.display = "block"
         fisrtName.innerHTML = isUsernameValid[1]
         mobileNumber.innerHTML = isMobileValid[1] 
-        generatedOTP.innerHTML = OTP
-
-
-    console.log("form valid==>",isUsernameValid[0],isEmailValid,isMobileValid[0],isFormValid)
-    // submit to the server if the form is valid
-    if (isFormValid) {
+        generatedOTP.innerHTML = OTP;
         return true
-    }else{
-        return false
     }
 });
 
@@ -196,7 +198,9 @@ form.addEventListener('submit', function (e) {
 validForm.addEventListener('submit', function (e) {
     e.preventDefault();
     if(OTP == typedotp.value){
-        window.location.replace("http://stackoverflow.com");
+        window.location.replace("http://pixel6.co/");
+    }else{
+        location.reload();
     }
 }) 
 
@@ -204,21 +208,33 @@ validForm.addEventListener('submit', function (e) {
 
 // Fuction call on every click in mobileNumber input box
 function myFunction() {
-
+    
    let valid = false;
+
+   
 
    const mobile = mobileEl.value.trim();
 
+   if (/^[A-Za-z]+$/.test(mobile)) {
+    // document.getElementById('mobile').value = mobile.substring(0, mobile.length - 1);
+    document.getElementById('mobile').value = '';
+    //showError(mobile, 'Invalid characters.');
+    alert("character not allowed")
+    return false;
+    }
+
    if(mobile.length >= 3 && mobile.length <= 3){
 
-       if(isBetween(test[0], 621, 799)){
+       if(isBetween(mobile, 621, 799)){
             jio.style.display = "block";
-       }else if(isBetween(test[0],801,920)){
+       }else if(isBetween(mobile,801,920)){
             idea.style.display = "block";
-       }else if(isBetween(test[0],921,999)){
+       }else if(isBetween(mobile,921,999)){
             vodafone.style.display = "block";
        }else{
-            console.log("invalid")
+            console.log("invalid");
+            alert('No match with any provider,please enter agian');
+            document.getElementById('mobile').value = '';
        }
 
        document.getElementById('mobile').value = '(' +mobile.toString()+') - ';
