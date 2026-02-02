@@ -1,76 +1,425 @@
- <!DOCTYPE html>
-<html>
-<head>
-    <title>JavaScript Form Validation</title>
-</head>
-<body>
-    <div class="container" id="firstForm">
-        <form id="signup" class="form">
-            <h1>Sign Up</h1>
-            <div class="form-field">
-                <label for="username">Username:</label>
-                <input type="text" name="username" id="username" autocomplete="off">
-                <small></small>
+<!doctype html>
+<html lang="en" class="h-full">
+ <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Income Expense Tracker</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="/_sdk/element_sdk.js"></script>
+  <script src="/_sdk/data_sdk.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+  <style>
+    body {
+      box-sizing: border-box;
+      font-family: 'DM Sans', sans-serif;
+    }
+    .transaction-enter {
+      animation: slideIn 0.3s ease-out;
+    }
+    @keyframes slideIn {
+      from {
+        opacity: 0;
+        transform: translateY(-10px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+    .delete-confirm {
+      animation: pulse 0.5s ease-in-out;
+    }
+    @keyframes pulse {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.05); }
+    }
+  </style>
+  <style>@view-transition { navigation: auto; }</style>
+ </head>
+ <body class="h-full">
+  <div id="app-wrapper" class="h-full w-full overflow-auto" style="background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #334155 100%);">
+   <div class="min-h-full w-full max-w-2xl mx-auto p-6"><!-- Header -->
+    <header class="text-center mb-8">
+     <h1 id="app-title" class="text-3xl font-bold text-white mb-2">💰 Income &amp; Expense Tracker</h1>
+     <p class="text-slate-400">Keep track of your finances</p>
+    </header><!-- Summary Cards -->
+    <div class="grid grid-cols-3 gap-4 mb-8">
+     <div class="bg-emerald-500/20 backdrop-blur-sm rounded-2xl p-4 border border-emerald-500/30">
+      <p id="income-label" class="text-emerald-400 text-sm font-medium mb-1">Total Income</p>
+      <p id="total-income" class="text-2xl font-bold text-emerald-300">$0.00</p>
+     </div>
+     <div class="bg-rose-500/20 backdrop-blur-sm rounded-2xl p-4 border border-rose-500/30">
+      <p id="expense-label" class="text-rose-400 text-sm font-medium mb-1">Total Expenses</p>
+      <p id="total-expenses" class="text-2xl font-bold text-rose-300">$0.00</p>
+     </div>
+     <div id="balance-card" class="bg-violet-500/20 backdrop-blur-sm rounded-2xl p-4 border border-violet-500/30">
+      <p id="balance-label" class="text-violet-400 text-sm font-medium mb-1">Net Balance</p>
+      <p id="net-balance" class="text-2xl font-bold text-violet-300">$0.00</p>
+     </div>
+    </div><!-- Add Transaction Form -->
+    <div class="bg-white/10 backdrop-blur-sm rounded-2xl p-6 mb-8 border border-white/20">
+     <h2 class="text-xl font-semibold text-white mb-4">Add Transaction</h2>
+     <form id="transaction-form" class="space-y-4">
+      <div class="grid grid-cols-2 gap-4">
+       <div><label for="type" class="block text-sm font-medium text-slate-300 mb-2">Type</label> <select id="type" class="w-full bg-slate-800/50 border border-slate-600 rounded-xl px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-violet-500"> <option value="income">💵 Income</option> <option value="expense">💸 Expense</option> </select>
+       </div>
+       <div><label for="category" class="block text-sm font-medium text-slate-300 mb-2">Category</label> <select id="category" class="w-full bg-slate-800/50 border border-slate-600 rounded-xl px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-violet-500"> <option value="salary">💼 Salary</option> <option value="freelance">🎨 Freelance</option> <option value="investment">📈 Investment</option> <option value="food">🍔 Food</option> <option value="transport">🚗 Transport</option> <option value="utilities">💡 Utilities</option> <option value="entertainment">🎮 Entertainment</option> <option value="shopping">🛍️ Shopping</option> <option value="health">🏥 Health</option> <option value="other">📦 Other</option> </select>
+       </div>
+      </div>
+      <div class="grid grid-cols-2 gap-4">
+       <div><label for="amount" class="block text-sm font-medium text-slate-300 mb-2">Amount</label> <input type="number" id="amount" step="0.01" min="0.01" placeholder="0.00" required class="w-full bg-slate-800/50 border border-slate-600 rounded-xl px-4 py-3 text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-violet-500">
+       </div>
+       <div><label for="date" class="block text-sm font-medium text-slate-300 mb-2">Date</label> <input type="date" id="date" required class="w-full bg-slate-800/50 border border-slate-600 rounded-xl px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-violet-500">
+       </div>
+      </div>
+      <div><label for="description" class="block text-sm font-medium text-slate-300 mb-2">Description</label> <input type="text" id="description" placeholder="Enter description..." required class="w-full bg-slate-800/50 border border-slate-600 rounded-xl px-4 py-3 text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-violet-500">
+      </div><button type="submit" id="submit-btn" class="w-full bg-gradient-to-r from-violet-600 to-purple-600 hover:from-violet-700 hover:to-purple-700 text-white font-semibold py-3 px-6 rounded-xl transition-all duration-200 transform hover:scale-[1.02]"> Add Transaction </button>
+     </form>
+     <p id="limit-warning" class="hidden text-amber-400 text-sm mt-3 text-center">⚠️ Maximum 999 transactions reached</p>
+    </div><!-- Transaction List -->
+    <div class="bg-white/10 backdrop-blur-sm rounded-2xl p-6 border border-white/20">
+     <h2 class="text-xl font-semibold text-white mb-4">Recent Transactions</h2>
+     <div id="transactions-list" class="space-y-3">
+      <p id="empty-state" class="text-slate-400 text-center py-8">No transactions yet. Add your first one above!</p>
+     </div>
+    </div><!-- Footer -->
+    <footer class="text-center mt-8 text-slate-500 text-sm">
+     <p>Your data is saved automatically in your Canva Sheet</p>
+    </footer>
+   </div>
+  </div>
+  <script>
+    const defaultConfig = {
+      app_title: '💰 Income & Expense Tracker',
+      income_label: 'Total Income',
+      expense_label: 'Total Expenses',
+      balance_label: 'Net Balance',
+      background_color: '#0f172a',
+      card_color: '#1e293b',
+      text_color: '#f1f5f9',
+      income_color: '#10b981',
+      expense_color: '#f43f5e',
+      font_family: 'DM Sans',
+      font_size: 16
+    };
+
+    let transactions = [];
+    let pendingDelete = null;
+
+    // Initialize date input to today
+    document.getElementById('date').valueAsDate = new Date();
+
+    // Format currency
+    function formatCurrency(amount) {
+      return new Intl.NumberFormat('en-US', {
+        style: 'currency',
+        currency: 'USD'
+      }).format(amount);
+    }
+
+    // Format date for display
+    function formatDate(dateStr) {
+      const date = new Date(dateStr);
+      return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+    }
+
+    // Get category emoji
+    function getCategoryEmoji(category) {
+      const emojis = {
+        salary: '💼', freelance: '🎨', investment: '📈',
+        food: '🍔', transport: '🚗', utilities: '💡',
+        entertainment: '🎮', shopping: '🛍️', health: '🏥', other: '📦'
+      };
+      return emojis[category] || '📦';
+    }
+
+    // Update summary totals
+    function updateSummary() {
+      const income = transactions.filter(t => t.type === 'income').reduce((sum, t) => sum + t.amount, 0);
+      const expenses = transactions.filter(t => t.type === 'expense').reduce((sum, t) => sum + t.amount, 0);
+      const balance = income - expenses;
+
+      document.getElementById('total-income').textContent = formatCurrency(income);
+      document.getElementById('total-expenses').textContent = formatCurrency(expenses);
+      document.getElementById('net-balance').textContent = formatCurrency(balance);
+
+      // Update balance card color based on positive/negative
+      const balanceCard = document.getElementById('balance-card');
+      if (balance >= 0) {
+        balanceCard.className = 'bg-emerald-500/20 backdrop-blur-sm rounded-2xl p-4 border border-emerald-500/30';
+        document.getElementById('net-balance').className = 'text-2xl font-bold text-emerald-300';
+        document.getElementById('balance-label').className = 'text-emerald-400 text-sm font-medium mb-1';
+      } else {
+        balanceCard.className = 'bg-rose-500/20 backdrop-blur-sm rounded-2xl p-4 border border-rose-500/30';
+        document.getElementById('net-balance').className = 'text-2xl font-bold text-rose-300';
+        document.getElementById('balance-label').className = 'text-rose-400 text-sm font-medium mb-1';
+      }
+    }
+
+    // Render transaction list with selective updates
+    function renderTransactions() {
+      const container = document.getElementById('transactions-list');
+      const emptyState = document.getElementById('empty-state');
+
+      if (transactions.length === 0) {
+        container.innerHTML = '';
+        container.appendChild(emptyState);
+        emptyState.classList.remove('hidden');
+        return;
+      }
+
+      emptyState.classList.add('hidden');
+
+      // Sort by date descending
+      const sorted = [...transactions].sort((a, b) => new Date(b.date) - new Date(a.date));
+
+      // Track existing elements
+      const existingElements = new Map();
+      container.querySelectorAll('[data-id]').forEach(el => {
+        existingElements.set(el.dataset.id, el);
+      });
+
+      // Clear and rebuild (simpler for sorted list)
+      container.innerHTML = '';
+
+      sorted.forEach(transaction => {
+        const isIncome = transaction.type === 'income';
+        const div = document.createElement('div');
+        div.dataset.id = transaction.__backendId;
+        div.className = `flex items-center justify-between p-4 rounded-xl transition-all duration-200 hover:scale-[1.01] ${isIncome ? 'bg-emerald-500/10 border border-emerald-500/20' : 'bg-rose-500/10 border border-rose-500/20'}`;
+
+        div.innerHTML = `
+          <div class="flex items-center gap-4">
+            <span class="text-2xl">${getCategoryEmoji(transaction.category)}</span>
+            <div>
+              <p class="font-medium text-white">${transaction.description}</p>
+              <p class="text-sm text-slate-400">${formatDate(transaction.date)} • ${transaction.category}</p>
             </div>
+          </div>
+          <div class="flex items-center gap-3">
+            <span class="font-bold text-lg ${isIncome ? 'text-emerald-400' : 'text-rose-400'}">
+              ${isIncome ? '+' : '-'}${formatCurrency(transaction.amount)}
+            </span>
+            <button class="delete-btn p-2 rounded-lg hover:bg-white/10 transition-colors text-slate-400 hover:text-rose-400" data-id="${transaction.__backendId}">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+              </svg>
+            </button>
+          </div>
+        `;
 
-            <div class="form-field">
-                <label for="email">Email:</label>
-                <input type="text" name="email" id="email" autocomplete="off">
-                <small></small>
-            </div>
+        container.appendChild(div);
+      });
 
-            <div class="form-field">
+      // Add delete event listeners
+      container.querySelectorAll('.delete-btn').forEach(btn => {
+        btn.addEventListener('click', handleDeleteClick);
+      });
 
-                <label for="mobile">mobile:</label>
-                    <input type="text"  onkeypress="myFunction()" name="mobile" id="mobile" autocomplete="off">
+      updateSummary();
+    }
 
-                    <img src="jio.png" style="width:25px;display:none" id="jio">
-  
-                    <img src="idea.png" style="width:25px;display:none" id="idea">
+    // Handle delete click with inline confirmation
+    async function handleDeleteClick(e) {
+      const btn = e.currentTarget;
+      const id = btn.dataset.id;
+      const transaction = transactions.find(t => t.__backendId === id);
 
-                    <img src="vodafone.jpeg" style="width:25px;display:none" id="vodafone">
+      if (!transaction) return;
 
-                    
-                    <span id="state"></span>
+      if (pendingDelete === id) {
+        // Second click - confirm delete
+        btn.disabled = true;
+        btn.innerHTML = '<span class="animate-spin">⏳</span>';
 
-                    <small></small>
+        const result = await window.dataSdk.delete(transaction);
+        if (!result.isOk) {
+          btn.disabled = false;
+          btn.innerHTML = '❌ Error';
+          setTimeout(() => {
+            btn.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>`;
+          }, 2000);
+        }
+        pendingDelete = null;
+      } else {
+        // First click - show confirmation
+        pendingDelete = id;
+        btn.innerHTML = '✓ Confirm';
+        btn.classList.add('delete-confirm', 'text-rose-400');
 
-            </div>
+        // Reset after 3 seconds if not confirmed
+        setTimeout(() => {
+          if (pendingDelete === id) {
+            pendingDelete = null;
+            btn.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>`;
+            btn.classList.remove('delete-confirm', 'text-rose-400');
+          }
+        }, 3000);
+      }
+    }
 
-            <div class="form-field">
-                <input type="submit" value="Sign Up">
-            </div>
-        </form>
-    </div>
+    // Handle form submission
+    document.getElementById('transaction-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
 
+      // Check limit
+      if (transactions.length >= 999) {
+        document.getElementById('limit-warning').classList.remove('hidden');
+        return;
+      }
 
+      const submitBtn = document.getElementById('submit-btn');
+      submitBtn.disabled = true;
+      submitBtn.textContent = 'Adding...';
 
-<div class="container" id="secondForm" >
-        <form id="validform" class="form" style="display:none">
-            <h1>Validation Form</h1>
-            <span id="generatedOTP"></span>
+      const newTransaction = {
+        type: document.getElementById('type').value,
+        category: document.getElementById('category').value,
+        amount: parseFloat(document.getElementById('amount').value),
+        description: document.getElementById('description').value,
+        date: document.getElementById('date').value
+      };
 
-            <h3>Dear <span id="firstName"></span> Thank you for your inquiry. A 4 digit verfication number has been sent to your phone number:
-            <span id="MobileNumber"></span> , please enter in the following box and submit for confirmation:
-            </h3>
+      const result = await window.dataSdk.create(newTransaction);
 
+      submitBtn.disabled = false;
+      submitBtn.textContent = 'Add Transaction';
 
-            <div class="form-field">
-                <label for="otp">OTP:</label>
-                <input type="number" name="otp" id="typedotp" autocomplete="off">
-                <small></small>
-            </div>
+      if (result.isOk) {
+        // Reset form
+        document.getElementById('amount').value = '';
+        document.getElementById('description').value = '';
+        document.getElementById('date').valueAsDate = new Date();
+      } else {
+        submitBtn.textContent = '❌ Failed - Try Again';
+        setTimeout(() => {
+          submitBtn.textContent = 'Add Transaction';
+        }, 2000);
+      }
+    });
 
+    // Data handler for SDK
+    const dataHandler = {
+      onDataChanged(data) {
+        transactions = data;
+        renderTransactions();
 
-            <div class="form-field">
-                <input type="submit" value="Validate">
-            </div>
-        </form>
-    </div>
+        // Update limit warning
+        if (transactions.length >= 999) {
+          document.getElementById('limit-warning').classList.remove('hidden');
+        } else {
+          document.getElementById('limit-warning').classList.add('hidden');
+        }
+      }
+    };
 
+    // Config change handler
+    async function onConfigChange(config) {
+      const appTitle = document.getElementById('app-title');
+      const incomeLabel = document.getElementById('income-label');
+      const expenseLabel = document.getElementById('expense-label');
+      const balanceLabel = document.getElementById('balance-label');
 
+      appTitle.textContent = config.app_title || defaultConfig.app_title;
+      incomeLabel.textContent = config.income_label || defaultConfig.income_label;
+      expenseLabel.textContent = config.expense_label || defaultConfig.expense_label;
+      balanceLabel.textContent = config.balance_label || defaultConfig.balance_label;
 
+      // Apply font
+      const fontFamily = config.font_family || defaultConfig.font_family;
+      document.body.style.fontFamily = `${fontFamily}, 'DM Sans', sans-serif`;
 
-    <script src="app.js"></script>
-</body>
+      // Apply font size scaling
+      const baseSize = config.font_size || defaultConfig.font_size;
+      appTitle.style.fontSize = `${baseSize * 1.875}px`;
+
+      // Apply colors
+      const bgColor = config.background_color || defaultConfig.background_color;
+      const textColor = config.text_color || defaultConfig.text_color;
+      const incomeColor = config.income_color || defaultConfig.income_color;
+      const expenseColor = config.expense_color || defaultConfig.expense_color;
+
+      document.getElementById('app-wrapper').style.background = `linear-gradient(135deg, ${bgColor} 0%, ${adjustColor(bgColor, 20)} 50%, ${adjustColor(bgColor, 40)} 100%)`;
+      appTitle.style.color = textColor;
+    }
+
+    // Helper to adjust color brightness
+    function adjustColor(hex, percent) {
+      const num = parseInt(hex.replace('#', ''), 16);
+      const amt = Math.round(2.55 * percent);
+      const R = Math.min(255, (num >> 16) + amt);
+      const G = Math.min(255, ((num >> 8) & 0x00FF) + amt);
+      const B = Math.min(255, (num & 0x0000FF) + amt);
+      return '#' + (0x1000000 + R * 0x10000 + G * 0x100 + B).toString(16).slice(1);
+    }
+
+    // Map to capabilities
+    function mapToCapabilities(config) {
+      return {
+        recolorables: [
+          {
+            get: () => config.background_color || defaultConfig.background_color,
+            set: (value) => { config.background_color = value; window.elementSdk.setConfig({ background_color: value }); }
+          },
+          {
+            get: () => config.card_color || defaultConfig.card_color,
+            set: (value) => { config.card_color = value; window.elementSdk.setConfig({ card_color: value }); }
+          },
+          {
+            get: () => config.text_color || defaultConfig.text_color,
+            set: (value) => { config.text_color = value; window.elementSdk.setConfig({ text_color: value }); }
+          },
+          {
+            get: () => config.income_color || defaultConfig.income_color,
+            set: (value) => { config.income_color = value; window.elementSdk.setConfig({ income_color: value }); }
+          },
+          {
+            get: () => config.expense_color || defaultConfig.expense_color,
+            set: (value) => { config.expense_color = value; window.elementSdk.setConfig({ expense_color: value }); }
+          }
+        ],
+        borderables: [],
+        fontEditable: {
+          get: () => config.font_family || defaultConfig.font_family,
+          set: (value) => { config.font_family = value; window.elementSdk.setConfig({ font_family: value }); }
+        },
+        fontSizeable: {
+          get: () => config.font_size || defaultConfig.font_size,
+          set: (value) => { config.font_size = value; window.elementSdk.setConfig({ font_size: value }); }
+        }
+      };
+    }
+
+    // Map to edit panel values
+    function mapToEditPanelValues(config) {
+      return new Map([
+        ['app_title', config.app_title || defaultConfig.app_title],
+        ['income_label', config.income_label || defaultConfig.income_label],
+        ['expense_label', config.expense_label || defaultConfig.expense_label],
+        ['balance_label', config.balance_label || defaultConfig.balance_label]
+      ]);
+    }
+
+    // Initialize SDKs
+    async function init() {
+      if (window.elementSdk) {
+        window.elementSdk.init({
+          defaultConfig,
+          onConfigChange,
+          mapToCapabilities,
+          mapToEditPanelValues
+        });
+      }
+
+      if (window.dataSdk) {
+        const result = await window.dataSdk.init(dataHandler);
+        if (!result.isOk) {
+          console.error('Failed to initialize data SDK');
+        }
+      }
+    }
+
+    init();
+  </script>
+ <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9c7b40562204a923',t:'MTc3MDA1MTY5NS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
